@@ -1,0 +1,27 @@
+name: Append Dates to Daily Journal
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight
+
+jobs:
+  append_dates:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Append date and summary to journal
+      run: |
+        echo "## $(date '+%Y-%m-%d')" >> /home/russ/git/journal.md
+        echo "Summary: " >> /home/russ/git/journal.md
+        echo "" >> /home/russ/git/journal.md
+
+    - name: Commit changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add /home/russ/git/journal.md
+        git commit -m "Append date and summary for $(date '+%Y-%m-%d')"
+        git push

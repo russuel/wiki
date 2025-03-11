@@ -1,0 +1,28 @@
+name: Assign and Summarize Issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  assign_and_summarize:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Assign issue to user
+      uses: actions-ecosystem/action-add-issue-assigner@v2
+      with:
+        assignees: russ
+
+    - name: Summarize issue content
+      uses: peter-evans/create-issue-from-file@v4
+      with:
+        title: 'Summary of Issue #${{ github.event.issue.number }}'
+        content-filepath: './summary.md'
+        labels: summary
+
+    - name: Generate summary
+      id: summarize
+      run: |
+        echo "## Summary" > summary.md
+        echo "${{ github.event.issue.body }}" >> summary.md

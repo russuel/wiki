@@ -1,0 +1,35 @@
+name: Handle Labels
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  handle-labels:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Get issue labels
+      id: get-labels
+      run: echo "::set-output name=labels::$(jq -r '.issue.labels | map(.name) | join(",")' $GITHUB_EVENT_PATH)"
+
+    - name: Save article as Markdown
+      if: contains(steps.get-labels.outputs.labels, 'md')
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pandoc
+        pandoc input_file.html -f html -t markdown -o output_file.md# Add your script to save the article as a Markdown file
+        echo "Saving article as Markdown..."
+
+    - name: Send article to Kindle
+      if: contains(steps.get-labels.outputs.labels, 'kindle')
+      run: |
+        # Add your script to send the article to your Kindle device
+        echo "Sending article to Kindle..."
+        sudo apt-get update
+        sudo apt-get install -y calibre
+        ebook-convert output_file.md output_file.mobi
+        calibre-smtp -r smtp.example.com -u your_email@example.com -p your_password --attachment output_file.mobi your_kindle_email@kindle.com
